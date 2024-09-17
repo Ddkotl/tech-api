@@ -12,3 +12,95 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  email    String  @unique
+  password String?
+
+  name   String   @default("Не указано")
+  avatar String   @default("/uploads/no-user-image.png")
+  role   UserRole @default(USER)
+
+  comments Comment[]
+
+  @@map("user")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  title     String
+  content   String
+  likeCount Int    @default(0) @map("like_count")
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @map("category_id")
+
+  tags     Tag[]     @relation("PostTags")
+  comments Comment[]
+  PostTag  PostTag[]
+
+  @@map("post")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  text   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String @map("post_id")
+
+  @@map("comment")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  title       String
+  description String
+
+  posts Post[]
+
+  @@map("category")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name    String    @unique
+  posts   Post[]    @relation("PostTags")
+  PostTag PostTag[]
+
+  @@map("tag")
+}
+
+model PostTag {
+  post   Post   @relation(fields: [postId], references: [id])
+  postId String @map("post_id")
+
+  tag   Tag    @relation(fields: [tagId], references: [id])
+  tagId String @map("tag_id")
+
+  @@id([postId, tagId]) // Composite key to ensure unique tag-post pairs
+  @@map("post_tag")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
