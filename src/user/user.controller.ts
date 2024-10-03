@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { CurrentUser } from './decorators/user.decorator';
 import { UserService } from './user.service';
@@ -11,14 +11,5 @@ export class UserController {
   @Get('profile')
   async getProfile(@CurrentUser('id') id: string) {
     return this.userService.getById(id);
-  }
-
-  @Auth()
-  @Patch('profile/favorites/:productId')
-  async toggleFavorite(
-    @CurrentUser('id') userId: string,
-    @Param('productId') productId: string,
-  ) {
-    return this.userService.toggleFavorite(productId, userId);
   }
 }

@@ -86,11 +86,6 @@ export class AuthService {
           name: req.user.name,
           picture: req.user.picture,
         },
-        include: {
-          stores: true,
-          favorites: true,
-          orders: true,
-        },
       });
     }
 
